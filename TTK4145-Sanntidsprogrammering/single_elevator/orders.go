@@ -3,6 +3,7 @@ package single_elevator
 import (
 	"TTK4145-Heislab/configuration"
 	"TTK4145-Heislab/driver-go/elevio"
+	"time"
 )
 
 func SetLights(orderMatrix Orders) { //skru av og på lys
@@ -10,6 +11,16 @@ func SetLights(orderMatrix Orders) { //skru av og på lys
 		for b := 0; b < configuration.NumButtons; b++ {
 			elevio.SetButtonLamp(elevio.ButtonType(b), f, orderMatrix[f][b])
 		}
+	}
+}
+
+func findClosestFloor() int {
+	for {
+		floor := elevio.GetFloor()
+		if floor != -1 {
+			return floor
+		}
+		time.Sleep(100 * time.Millisecond) // Sjekker hvert 100 ms
 	}
 }
 

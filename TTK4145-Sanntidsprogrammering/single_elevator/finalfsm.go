@@ -59,15 +59,7 @@ func runTimer(duration time.Duration, timeOutChannel chan<- bool, resetTimerChan
 	}
 }
 
-func findClosestFloor() int {
-	for {
-		floor := elevio.GetFloor()
-		if floor != -1 {
-			return floor
-		}
-		time.Sleep(100 * time.Millisecond) // Sjekker hvert 100 ms
-	}
-}
+
 
 //WHERE TO UPDATE FLOOR - updating on channel at all times.
 
@@ -77,6 +69,7 @@ func SingleElevator(
 	newLocalStateChannel chan<- State, //sending information about the elevators current state TO ORDER MANAGER
 
 ) {
+	//for å initialisere å evt gå til nærmeste etasje
 	fmt.Println("Initializing elevator...")
 
 	var state State
@@ -86,20 +79,15 @@ func SingleElevator(
 		fmt.Println("Heis starter i etasje", currentFloor)
 		state = State{Floor: currentFloor, Behaviour: Idle, Direction: elevio.MD_Stop}
 	} else {
-		fmt.Println("Heis er mellom to etasjer, går nedover")
-		elevio.SetMotorDirection(elevio.MD_Down) // Bevegelse nedover for å finne nærmeste etasje
+		fmt.Println("Elevator beetween floors, go down")
+		elevio.SetMotorDirection(elevio.MD_Down) 
 		closestFloor := findClosestFloor()
-		fmt.Println("Nærmeste etasje funnet:", closestFloor)
-		elevio.SetMotorDirection(elevio.MD_Stop) // Stopp motor når etasjen er funnet
+		fmt.Println("floor found: ", closestFloor)
+		elevio.SetMotorDirection(elevio.MD_Stop) 
 		state = State{Floor: closestFloor, Behaviour: Idle, Direction: elevio.MD_Stop}
 	}
 
-	/*
-		fmt.Println("setting motor down")
-		elevio.SetMotorDirection(elevio.MD_Down)
-		state := State{Direction: Down, Behaviour: Moving}
-	*/
-
+	
 	//creating channels for communication
 	floorEnteredChannel := make(chan int) //tells which floor elevator is at
 	obstructedChannel := make(chan bool, 16)
