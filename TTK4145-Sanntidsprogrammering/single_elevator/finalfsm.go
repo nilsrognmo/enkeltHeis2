@@ -77,7 +77,6 @@ func SingleElevator(
 	newLocalStateChannel chan<- State, //sending information about the elevators current state TO ORDER MANAGER
 
 ) {
-	//Initialization of elevator
 	fmt.Println("Initializing elevator...")
 
 	var state State
@@ -87,17 +86,12 @@ func SingleElevator(
 		fmt.Println("Heis starter i etasje", currentFloor)
 		state = State{Floor: currentFloor, Behaviour: Idle, Direction: elevio.MD_Stop}
 	} else {
-		fmt.Println("Heis er mellom to etasjer, søker nærmeste...")
+		fmt.Println("Heis er mellom to etasjer, går nedover")
+		elevio.SetMotorDirection(elevio.MD_Down) // Bevegelse nedover for å finne nærmeste etasje
 		closestFloor := findClosestFloor()
-		if closestFloor > state.Floor {
-			fmt.Println("Beveger opp til nærmeste etasje:", closestFloor)
-			elevio.SetMotorDirection(elevio.MD_Up)
-			state = State{Behaviour: Moving, Direction: Direction(elevio.MD_Up)}
-		} else {
-			fmt.Println("Beveger ned til nærmeste etasje:", closestFloor)
-			elevio.SetMotorDirection(elevio.MD_Down)
-			state = State{Behaviour: Moving, Direction: elevio.MD_Down}
-		}
+		fmt.Println("Nærmeste etasje funnet:", closestFloor)
+		elevio.SetMotorDirection(elevio.MD_Stop) // Stopp motor når etasjen er funnet
+		state = State{Floor: closestFloor, Behaviour: Idle, Direction: elevio.MD_Stop}
 	}
 
 	/*
